@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Quest Racer — WebXR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- A-Frame (WebXR ready) -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- Simple sky + fog for depth -->
+  <style>
+    body { margin: 0; background: #000; }
+    #hud {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      bottom: 16px; color: #fff; font-family: system-ui, sans-serif;
+      background: rgba(0,0,0,0.5); padding: 10px 14px; border-radius: 12px;
+    }
+    #hud b { color: #6cf; }
+    .pc-only { display: none; }
+    @media (pointer:fine) {
+      .pc-only { display: inline; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Heads-up display (visible outside VR for quick hints) -->
+  <div id="hud">
+    <span class="pc-only">Desktop test: Click scene, WASD/←→ to steer, Space to boost.</span>
+    <span>In VR: Left thumbstick to steer, Right trigger to boost. Look where you want to go.</span>
+  </div>
+
+  <a-scene background="color: #102030" renderer="antialias: true; colorManagement: true" fog="type: exponential; color: #0b1622; density: 0.035">
+    <!-- Lighting -->
+    <a-entity light="type: ambient; intensity: 0.35"></a-entity>
+    <a-entity light="type: directional; intensity: 0.9" position="10 20 10"></a-entity>
+
+    <!-- Player rig (camera + controllers) -->
+    <a-entity id="rig" position="0 1.6 0">
+      <a-entity id="camera" camera look-controls wasd-controls="acceleration: 0" position="0 0 0"></a-entity>
+      <!-- Optional controller models (Quest / Oculus Touch) -->
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <a-entity oculus-touch-controls="hand: right"></a-entity>
+    </a-entity>
+
+    <!-- Car (invisible body you ride) -->
+    <a-entity id="car"
+              position="0 0 0"
+              car-controller="speed: 6; maxSpeed: 18; acceleration: 6; brake: 10; turnRate: 85; drift: 0.94; boostForce: 14; boostTime: 900"
+              rotation="0 0 0">
+      <!-- Visible car shell in front of camera -->
+      <a-entity position="0 0 -0.8" rotation="0 0 0">
+        <a-entity geometry="primitive: box; depth: 1.2; height: 0.4; width: 0.7"
+                  material="color: #2dd; metalness: 0.2; roughness: 0.7"></a-entity>
+        <a-entity geometry="primitive: box; depth: 0.6; height: 0.25; width: 0.7"
+                  position="0 0.35 -0.1"
+                  material="color: #0aa; metalness: 0.2; roughness: 0.7"></a-entity>
+        <!-- Glow strips -->
+        <a-entity geometry="primitive: box; depth: 0.05; height: 0.05; width: 0.7"
+                  position="0 -0.15 -0.5"
+                  material="color: #6cf; emissive: #6cf; emissiveIntensity: 1.5"></a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!-- Ground and track -->
+    <a-entity id="ground" geometry="primitive: plane; width: 200; height: 200"
+              rotation="-90 0 0"
+              material="color: #0e1b29; roughness: 1"></a-entity>
+
+    <!-- Simple looping track using boxes -->
+    <!-- Straight segments -->
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 60" position="0 0.1 -30"
+              material="color: #1e2f41"></a-entity>
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 60" position="0 0.1 30"
+              material="color: #1e2f41"></a-entity>
+    <!-- Curves (approximate with rotated boxes) -->
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 20" position="10 0.1 60" rotation="0 35 0"
+              material="color: #1e2f41"></a-entity>
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 20" position="25 0.1 70" rotation="0 65 0"
+              material="color: #1e2f41"></a-entity>
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 20" position="40 0.1 60" rotation="0 95 0"
+              material="color: #1e2f41"></a-entity>
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 20" position="50 0.1 40" rotation="0 125 0"
+              material="color: #1e2f41"></a-entity>
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 20" position="50 0.1 20" rotation="0 155 0"
+              material="color: #1e2f41"></a-entity>
+    <a-entity geometry="primitive: box; width: 8; height: 0.2; depth: 20" position="40 0.1 0" rotation="0 185 0"
+              material="color: #1e2f41"></a-entity>
+    <!-- Barriers -->
+    <a-entity geometry="primitive: box; width: 0.5; height: 0.8; depth: 120" position="-4.25 0.4 0" material="color: #334"></a-entity>
+    <a-entity geometry="primitive: box; width: 0.5; height: 0.8; depth: 120" position="4.25 0.4 0" material="color: #334"></a-entity>
+
+    <!-- Checkpoints -->
+    <a-entity geometry="primitive: torus; radius: 2.5; radiusTubular: 0.15" position="0 2 -55"
+              material="color: #f8c; emissive: #f8c; emissiveIntensity: 1.2"></a-entity>
+    <a-entity geometry="primitive: torus; radius: 2.5; radiusTubular
